@@ -5,6 +5,8 @@
       <elementProp name="TestPlan.user_defined_variables" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
         <collectionProp name="Arguments.arguments"/>
       </elementProp>
+      <boolProp name="TestPlan.functional_mode">false</boolProp>
+      <boolProp name="TestPlan.serialize_threadgroups">false</boolProp>
     </TestPlan>
     <hashTree>
       <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Thread Group">
@@ -18,7 +20,22 @@
         </elementProp>
       </ThreadGroup>
       <hashTree>
-        <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager">
+        <Arguments guiclass="ArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
+          <collectionProp name="Arguments.arguments">
+            <elementProp name="secretKey" elementType="Argument">
+              <stringProp name="Argument.name">secretKey</stringProp>
+              <stringProp name="Argument.value">appSecret</stringProp>
+              <stringProp name="Argument.metadata">=</stringProp>
+            </elementProp>
+            <elementProp name="body" elementType="Argument">
+              <stringProp name="Argument.name">body</stringProp>
+              <stringProp name="Argument.value">{ 	&quot;name&quot;: &quot;shanghai&quot;, 	&quot;country&quot;: &quot;china&quot; }</stringProp>
+              <stringProp name="Argument.metadata">=</stringProp>
+            </elementProp>
+          </collectionProp>
+        </Arguments>
+        <hashTree/>
+        <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
           <collectionProp name="HeaderManager.headers">
             <elementProp name="" elementType="Header">
               <stringProp name="Header.name">Content-Type</stringProp>
@@ -27,7 +44,7 @@
           </collectionProp>
         </HeaderManager>
         <hashTree/>
-        <ConfigTestElement guiclass="HttpDefaultsGui" testclass="ConfigTestElement" testname="HTTP Request Defaults">
+        <ConfigTestElement guiclass="HttpDefaultsGui" testclass="ConfigTestElement" testname="HTTP Request Defaults" enabled="true">
           <stringProp name="HTTPSampler.domain">localhost</stringProp>
           <stringProp name="HTTPSampler.port">9091</stringProp>
           <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
@@ -37,7 +54,7 @@
         </ConfigTestElement>
         <hashTree/>
         <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="HTTP Request">
-          <stringProp name="HTTPSampler.path">/city?timestamp=1732083073982&amp;sign=94cb3c009056d3fe6721546863a00aa1</stringProp>
+          <stringProp name="HTTPSampler.path">/city?timestamp=${timestamp}&amp;sign=${sign}</stringProp>
           <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
           <stringProp name="HTTPSampler.method">POST</stringProp>
           <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
@@ -46,18 +63,39 @@
             <collectionProp name="Arguments.arguments">
               <elementProp name="" elementType="HTTPArgument">
                 <boolProp name="HTTPArgument.always_encode">false</boolProp>
-                <stringProp name="Argument.value">{&#xd;
-	&quot;name&quot;: &quot;shanghai&quot;,&#xd;
-	&quot;country&quot;: &quot;china&quot;&#xd;
-}&#xd;
-</stringProp>
+                <stringProp name="Argument.value">${body}</stringProp>
                 <stringProp name="Argument.metadata">=</stringProp>
               </elementProp>
             </collectionProp>
           </elementProp>
         </HTTPSamplerProxy>
-        <hashTree/>
-        <JSONPathAssertion guiclass="JSONPathAssertionGui" testclass="JSONPathAssertion" testname="JSON Assertion">
+        <hashTree>
+          <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="JSR223 PreProcessor">
+            <stringProp name="scriptLanguage">groovy</stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="filename"></stringProp>
+            <stringProp name="cacheKey">true</stringProp>
+            <stringProp name="script">import java.time.Instant;
+
+import org.apache.commons.codec.digest.DigestUtils;
+
+String timestamp = String.valueOf(Instant.now().toEpochMilli());
+
+vars.put(&quot;timestamp&quot;, timestamp);
+
+String secretKey = vars.get(&quot;secretKey&quot;);
+
+String body = vars.get(&quot;body&quot;);
+
+String strToSign = secretKey + &quot;timestamp&quot; + timestamp + body + secretKey;
+
+String sign = DigestUtils.md5Hex(strToSign.getBytes(&quot;UTF-8&quot;));
+
+vars.put(&quot;sign&quot;, sign);</stringProp>
+          </JSR223PreProcessor>
+          <hashTree/>
+        </hashTree>
+        <JSONPathAssertion guiclass="JSONPathAssertionGui" testclass="JSONPathAssertion" testname="JSON Assertion" enabled="true">
           <stringProp name="JSON_PATH">$.code</stringProp>
           <stringProp name="EXPECTED_VALUE">0</stringProp>
           <boolProp name="JSONVALIDATION">true</boolProp>
