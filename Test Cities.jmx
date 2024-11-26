@@ -29,7 +29,7 @@
           <stringProp name="HTTPSampler.implementation">HttpClient4</stringProp>
         </ConfigTestElement>
         <hashTree/>
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="HTTP Request" enabled="true">
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="HTTP Request">
           <stringProp name="HTTPSampler.path">/city?timestamp=${timestamp}&amp;sign=${sign}</stringProp>
           <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
           <stringProp name="HTTPSampler.method">GET</stringProp>
@@ -48,6 +48,8 @@
 
 import org.apache.commons.codec.digest.DigestUtils;
 
+import java.net.URL;
+
 String timestamp = String.valueOf(Instant.now().toEpochMilli());
 
 vars.put(&quot;timestamp&quot;, timestamp);
@@ -61,7 +63,18 @@ String sign = DigestUtils.md5Hex(strToSign.getBytes(&quot;UTF-8&quot;));
 vars.put(&quot;sign&quot;, sign);
 
 log.info(&quot;J-L-Logger {}&quot;, log.getClass().getName());
-log.info(&quot;J-L-Sign {}&quot;, sign);</stringProp>
+log.info(&quot;J-L-Sign {}&quot;, sign);
+
+URL url = sampler.getUrl();
+
+String httpMethod = sampler.getMethod();
+String path = sampler.getPath();
+
+log.info(&quot;The URL Is: {}&quot;, url.toString());
+log.info(&quot;The HTTP Method Is: {}&quot;, httpMethod);
+log.info(&quot;The Path Of URL Is: {}&quot;, path);
+
+log.info(&quot;HTTP Method {}, URL {}, Path {}&quot;, httpMethod, url, path);</stringProp>
             <stringProp name="scriptLanguage">groovy</stringProp>
           </JSR223PreProcessor>
           <hashTree/>
