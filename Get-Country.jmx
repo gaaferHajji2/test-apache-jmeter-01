@@ -5,6 +5,8 @@
       <elementProp name="TestPlan.user_defined_variables" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
         <collectionProp name="Arguments.arguments"/>
       </elementProp>
+      <boolProp name="TestPlan.functional_mode">false</boolProp>
+      <boolProp name="TestPlan.serialize_threadgroups">false</boolProp>
     </TestPlan>
     <hashTree>
       <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Thread Group">
@@ -18,11 +20,21 @@
         </elementProp>
       </ThreadGroup>
       <hashTree>
+        <Arguments guiclass="ArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
+          <collectionProp name="Arguments.arguments">
+            <elementProp name="secretKey" elementType="Argument">
+              <stringProp name="Argument.name">secretKey</stringProp>
+              <stringProp name="Argument.value">appSecret</stringProp>
+              <stringProp name="Argument.metadata">=</stringProp>
+            </elementProp>
+          </collectionProp>
+        </Arguments>
+        <hashTree/>
         <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager">
           <collectionProp name="HeaderManager.headers">
             <elementProp name="" elementType="Header">
               <stringProp name="Header.name">sign</stringProp>
-              <stringProp name="Header.value">0a421673aa44b148e9c8cc5323e011d2</stringProp>
+              <stringProp name="Header.value">${sign}</stringProp>
             </elementProp>
           </collectionProp>
         </HeaderManager>
@@ -37,7 +49,7 @@
         </ConfigTestElement>
         <hashTree/>
         <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="HTTP Request">
-          <stringProp name="HTTPSampler.path">/city/?timestamp=1732083563365</stringProp>
+          <stringProp name="HTTPSampler.path">/city/?timestamp=${timestamp}</stringProp>
           <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
           <stringProp name="HTTPSampler.method">GET</stringProp>
           <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
@@ -46,8 +58,35 @@
             <collectionProp name="Arguments.arguments"/>
           </elementProp>
         </HTTPSamplerProxy>
-        <hashTree/>
-        <JSONPathAssertion guiclass="JSONPathAssertionGui" testclass="JSONPathAssertion" testname="JSON Assertion">
+        <hashTree>
+          <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="JSR223 PreProcessor">
+            <stringProp name="scriptLanguage">groovy</stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="filename"></stringProp>
+            <stringProp name="cacheKey">true</stringProp>
+            <stringProp name="script">import java.time.Instant;
+
+import org.apache.commons.codec.digest.DigestUtils;
+
+String timestamp = String.valueOf(Instant.now().toEpochMilli());
+
+vars.put(&quot;timestamp&quot;, timestamp);
+
+String secretKey = vars.get(&quot;secretKey&quot;);
+
+System.out.println(&quot;The Secret Key Is: &quot; + secretKey);
+
+String strToSign = secretKey + &quot;timestamp&quot; + timestamp + secretKey;
+
+System.out.println(&quot;The Str To Sign Is: &quot; + strToSign);
+
+String sign = DigestUtils.md5Hex(strToSign.getBytes(&quot;UTF-8&quot;));
+
+vars.put(&quot;sign&quot;, sign);</stringProp>
+          </JSR223PreProcessor>
+          <hashTree/>
+        </hashTree>
+        <JSONPathAssertion guiclass="JSONPathAssertionGui" testclass="JSONPathAssertion" testname="JSON Assertion" enabled="true">
           <stringProp name="JSON_PATH">$.code</stringProp>
           <stringProp name="EXPECTED_VALUE">0</stringProp>
           <boolProp name="JSONVALIDATION">true</boolProp>
