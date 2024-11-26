@@ -70,11 +70,16 @@ URL url = sampler.getUrl();
 String httpMethod = sampler.getMethod();
 String path = sampler.getPath();
 
+String query = url.getQuery();
+
+sampler.setPath(sampler.getPath() + &quot;&amp;city=Beijing&quot;);
+
 log.info(&quot;The URL Is: {}&quot;, url.toString());
 log.info(&quot;The HTTP Method Is: {}&quot;, httpMethod);
 log.info(&quot;The Path Of URL Is: {}&quot;, path);
+log.info(&quot;The Query IN URL Is: {}&quot;, query);
 
-log.info(&quot;HTTP Method {}, URL {}, Path {}&quot;, httpMethod, url, path);</stringProp>
+log.info(&quot;HTTP Method {}, URL {}, Path {}, Query Data {}&quot;, httpMethod, url, path, query);</stringProp>
             <stringProp name="scriptLanguage">groovy</stringProp>
           </JSR223PreProcessor>
           <hashTree/>
