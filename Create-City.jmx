@@ -20,7 +20,7 @@
         </elementProp>
       </ThreadGroup>
       <hashTree>
-        <Arguments guiclass="ArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
+        <Arguments guiclass="ArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
           <collectionProp name="Arguments.arguments">
             <elementProp name="secretKey" elementType="Argument">
               <stringProp name="Argument.name">secretKey</stringProp>
@@ -53,7 +53,7 @@
           <stringProp name="HTTPSampler.implementation">HttpClient4</stringProp>
         </ConfigTestElement>
         <hashTree/>
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="HTTP Request" enabled="true">
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="HTTP Request">
           <stringProp name="HTTPSampler.path">/city?timestamp=${timestamp}&amp;sign=${sign}</stringProp>
           <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
           <stringProp name="HTTPSampler.method">POST</stringProp>
@@ -76,8 +76,17 @@
             <stringProp name="filename"></stringProp>
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="script">import java.time.Instant;
-
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.jmeter.protocol.http.util.HTTPArgument;
+import org.apache.jmeter.testelement.property.JMeterProperty;
+
+StringBuilder postBody = new StringBuilder();
+
+for(JMeterProperty jmeterProperty: sampler.getArguments()){
+	HTTPArgument arg = (HTTPArgument) jmeterProperty.getObjectValue();
+
+	postBody.append(arg.getEncodedValue());
+}
 
 String timestamp = String.valueOf(Instant.now().toEpochMilli());
 
@@ -91,7 +100,12 @@ String strToSign = secretKey + &quot;timestamp&quot; + timestamp + body + secret
 
 String sign = DigestUtils.md5Hex(strToSign.getBytes(&quot;UTF-8&quot;));
 
-vars.put(&quot;sign&quot;, sign);</stringProp>
+vars.put(&quot;sign&quot;, sign);
+
+String tBody = postBody.toString();
+
+log.info(&quot;The tBody is: {}&quot;, tBody);
+log.info(&quot;The Vars Body Is: {}&quot;, body);</stringProp>
           </JSR223PreProcessor>
           <hashTree/>
         </hashTree>
