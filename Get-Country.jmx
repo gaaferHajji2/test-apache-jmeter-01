@@ -30,15 +30,6 @@
           </collectionProp>
         </Arguments>
         <hashTree/>
-        <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
-          <collectionProp name="HeaderManager.headers">
-            <elementProp name="" elementType="Header">
-              <stringProp name="Header.name">sign</stringProp>
-              <stringProp name="Header.value">${sign}</stringProp>
-            </elementProp>
-          </collectionProp>
-        </HeaderManager>
-        <hashTree/>
         <ConfigTestElement guiclass="HttpDefaultsGui" testclass="ConfigTestElement" testname="HTTP Request Defaults" enabled="true">
           <stringProp name="HTTPSampler.domain">localhost</stringProp>
           <stringProp name="HTTPSampler.port">9091</stringProp>
@@ -48,7 +39,7 @@
           <stringProp name="HTTPSampler.implementation">HttpClient4</stringProp>
         </ConfigTestElement>
         <hashTree/>
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="HTTP Request">
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="HTTP Request" enabled="true">
           <stringProp name="HTTPSampler.path">/country/?timestamp=${timestamp}</stringProp>
           <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
           <stringProp name="HTTPSampler.method">GET</stringProp>
@@ -65,8 +56,9 @@
             <stringProp name="filename"></stringProp>
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="script">import java.time.Instant;
-
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.jmeter.protocol.http.control.Header;
+import org.apache.jmeter.protocol.http.control.HeaderManager;
 
 String timestamp = String.valueOf(Instant.now().toEpochMilli());
 
@@ -74,15 +66,23 @@ vars.put(&quot;timestamp&quot;, timestamp);
 
 String secretKey = vars.get(&quot;secretKey&quot;);
 
-System.out.println(&quot;The Secret Key Is: &quot; + secretKey);
+//System.out.println(&quot;The Secret Key Is: &quot; + secretKey);
 
 String strToSign = secretKey + &quot;timestamp&quot; + timestamp + secretKey;
 
-System.out.println(&quot;The Str To Sign Is: &quot; + strToSign);
+//System.out.println(&quot;The Str To Sign Is: &quot; + strToSign);
 
 String sign = DigestUtils.md5Hex(strToSign.getBytes(&quot;UTF-8&quot;));
 
-vars.put(&quot;sign&quot;, sign);</stringProp>
+vars.put(&quot;sign&quot;, sign);
+
+//HeaderManager headerManager = sampler.getHeaderManager();
+HeaderManager headerManager = new HeaderManager();
+sampler.setHeaderManager(headerManager);
+
+headerManager.removeHeaderNamed(&quot;sign&quot;);
+
+headerManager.add(new Header(&quot;sign&quot;, sign));</stringProp>
           </JSR223PreProcessor>
           <hashTree/>
         </hashTree>
